@@ -3,12 +3,12 @@ local getArgs = require('Module:Arguments').getArgs
 local yesno = require('Module:Yesno')
 
 local linksTable = {
-  'BV': 'https://bilibili.com/video/BV',
-  'av': 'https://bilibili.com/video/av',
-  'sm': 'https://nicovideo.jp/watch/sm',
+  ['BV'] = 'https://bilibili.com/video/BV',
+  ['av'] = 'https://bilibili.com/video/av',
+  ['sm'] = 'https://nicovideo.jp/watch/sm',
 }
 local statusTable = {
-  '删除': '<s>%s</s>'
+  ['删除'] = '<s>%s</s>',
 }
 
 function p.generate(frame)

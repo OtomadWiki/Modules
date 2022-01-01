@@ -1,4 +1,5 @@
 .*.sw*
+/lua_modules
 
 # Compiled Lua sources
 luac.out
