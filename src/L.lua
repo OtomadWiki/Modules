@@ -25,10 +25,10 @@ function p.generate(frame)
 
   local res = yesno(args['pl']) == 'y' and '' or '[' ..
               link .. (part and part or '') ..
-              yesno(args['pl']) == 'y' and '' or ('' ..
+              (yesno(args['pl']) == 'y' and '' or ('' ..
 				        ' ' ..
 				        text ..
-				        ']')
+				        ']'))
   return res
 end
 
