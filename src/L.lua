@@ -19,16 +19,16 @@ function p.generate(frame)
 	local digit = num:sub(3)
 	local link = linksTable[prefix] .. digit
 
-	local text = args[2]
+	local text = args[2] or args[1]
 	local part = args["p"]
 	local status = args["状态"]
 
   local res = yesno(args['pl']) == 'y' and '' or '[' ..
-				link .. (part and part or '') ..
-				yesno(args['pl']) == 'y' and '' or ('' ..
-				  ' ' ..
-				  text ..
-				  ']')
+              link .. (part and part or '') ..
+              yesno(args['pl']) == 'y' and '' or ('' ..
+				        ' ' ..
+				        text ..
+				        ']')
   return res
 end
 
