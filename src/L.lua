@@ -25,12 +25,9 @@ function L.generate(frame)
 	local part = args["p"]
 	local status = args["状态"]
 
-  local res = ( yesno(_G.pureLink or args['pl']) == 'y' ) and '' or '[' ..
-              link .. (part and part or '') ..
-              ( yesno(args['pl']) == 'y' and '' or ( '' ..
-				        ' ' ..
-				        text ..
-				        ']' ))
+  local res = ( yesno(args['pl']) == 'y' ) and '' or '[' ..
+              link ..  ( part and "?p="..part or '' ) ..
+              ( yesno(args['pl']) == 'y' and '' or ' '..text..']' )
   return res
 end
 
