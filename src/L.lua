@@ -1,20 +1,22 @@
-local p={}
+local L={}
 local getArgs = require('Module:Arguments').getArgs
 local yesno = require('Module:Yesno')
 
 local linksTable = {
-  ['BV'] = 'https://bilibili.com/video/BV',
-  ['av'] = 'https://bilibili.com/video/av',
+  ['bv'] = 'https://www.bilibili.com/video/BV',
+  ['av'] = 'https://www.bilibili.com/video/av',
   ['sm'] = 'https://nicovideo.jp/watch/sm',
+  ['nm'] = 'https://nicovideo.jp/watch/nm',
+  ['ac'] = 'https:///acfun.cn/v/ac',
 }
 local statusTable = {
   ['删除'] = '<s>%s</s>',
 }
 
-function p.generate(frame)
+function L.generate(frame)
 	local args = getArgs(frame)
 
-	local num = (args['archive']~=nil and {args['archive']} or {args[1]})[1]
+	local num = ( args['archive']~=nil and {args['archive']} or {args[1]})[1]
 	local prefix = string.lower(num:sub(1, 2))
 	local digit = num:sub(3)
 	local link = linksTable[prefix] .. digit
@@ -23,13 +25,13 @@ function p.generate(frame)
 	local part = args["p"]
 	local status = args["状态"]
 
-  local res = yesno(args['pl']) == 'y' and '' or '[' ..
+  local res = ( yesno(_G.pureLink or args['pl']) == 'y' ) and '' or '[' ..
               link .. (part and part or '') ..
-              (yesno(args['pl']) == 'y' and '' or ('' ..
+              ( yesno(args['pl']) == 'y' and '' or ( '' ..
 				        ' ' ..
 				        text ..
-				        ']'))
+				        ']' ))
   return res
 end
 
-return p
+return L
