@@ -37,7 +37,7 @@ function L.generate(frame)
 	local html = mw.html.create()
 	local errorMessage = html
 		:tag("strong"):addClass("error"):wikitext("请指定正确的作品号及其前缀！"):done()
-		:tag():wikitext("可用的作品号前缀参见 [[Template:L]]。"):done()
+		:tag("span"):wikitext("可用的作品号前缀参见 [[Template:L]]。"):done()
 	local partText = part and tostring(html
 		:tag("sup"):wikitext("第"..part.."P")) or ''
 
