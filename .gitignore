@@ -1,5 +1,6 @@
 .*.sw*
 /lua_modules
+.trash
 
 # Compiled Lua sources
 luac.out

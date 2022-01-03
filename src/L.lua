@@ -1,6 +1,12 @@
 local L={}
-local getArgs = require('Module:Arguments').getArgs
-local yesno = require('Module:Yesno')
+
+package.path = 'lua_modules/?/?.lua'
+local mw = require("mw")
+local getArgs = require('Arguments').getArgs
+local yesno = require('Yesno')
+--local libraryUtil = require('libraryUtil')
+--local checkType = libraryUtil.checkType
+local html = mw.html.create()
 
 local linksTable = {
   ['bv'] = 'https://www.bilibili.com/video/BV',
@@ -18,38 +24,86 @@ local linksTable = {
   ['pid'] = 'https://www.pixiv.net/artworks/',
   ['uid'] = 'https://space.bilibili.com/uid',
 }
-local statusTable = {
-  ['删除'] = '<s>%s</s>',
-}
 
-function L.generate(frame)
+local function isInArray(val, t)
+	for _, v in ipairs(t) do
+		if v == val then
+			return true
+		end
+	end
+	return false
+end
+
+function html:addTag(...)
+	local self = self or html
+	local args, tagName, wikitext, className,attr, style
+	if #{...} == 1 then
+        args = ...
+		tagName = args.tagName
+		wikitext = args.wikitext
+		className = args.className
+		attr = args.attr
+		style = args.style
+	else
+		tagName, wikitext, className, attr, style = ...
+	end
+	local output = self:tag(tagName):wikitext(wikitext)
+	if attr then output = output:attr(attr) end
+	if className then output = output:addClass(className) end
+	if style then output = output:cssText(style) end
+	return output--:done()
+end
+
+function L.generate(frame, options)
+	frame = frame or {}
+	options = options or {}
 	local args = getArgs(frame)
 
-	local num = ( args['archive']~=nil and {args['archive']} or {args[1]})[1]
-	local prefix = linksTable[num:sub(1, 3)] and string.lower(num:sub(1, 3)) or string.lower(num:sub(1, 2))
+	local num = args['archive'] or args[1]
+	local prefix = ( linksTable[num:sub(1, 3)] and string.lower(num:sub(1, 3)) ) or string.lower(num:sub(1, 2))
 	local digit = num:sub(3)
-	local link = linksTable[prefix] .. digit
-
-	local text = args[2] or args[1]
-	local part = args["p"]
+	local part = args["p"] == 1 and args["p"]
 	local status = args["状态"]
 
-	local html = mw.html.create()
-	local errorMessage = html
-		:tag("strong"):addClass("error"):wikitext("请指定正确的作品号及其前缀！"):done()
-		:tag("span"):wikitext("可用的作品号前缀参见 [[Template:L]]。"):done()
-	local partText = part and tostring(html
-		:tag("sup"):wikitext("第"..part.."P")) or ''
+	local link = linksTable[prefix] .. digit .. (( part ~= '1' and part ) and "?p=".. part or '' )
+	local text = args[2] or args[1]
+	local partText = ( part and "<sup>第"..part.."P</sup>" ) or ''
+	local errorMessage = html:addTag("strong", "请指定正确的作品号及其前缀！", "error"):done()
+		:addTag("span", "可用的作品号前缀参见 [[Template:L]]。")
 
-	local plainLinks = html
-	:tag("span"):addClass("plainlinks"):wikitext("[[分类:有失效作品链接的页面]]{{color|grey|<s>" ..
-		text ..
-		partText ..
-		"</s>}}"):done()
-
-	local res = ( yesno(args['pl']) == 'y' ) and '' or '[' ..
-        link ..  ( part and "?p="..part or '' ) ..
-        ( yesno(args['pl']) == 'y' and '' or ' '..text..']' )
+	local res
+	local function output(statText)
+		return ( yesno(args['pl']) and '' or '[' ) ..
+			link ..
+			( yesno(args['pl']) and '' or ' ' .. tostring(statText) .. ']' )
+	end
+	if status then
+		local statusTable = {
+			normal = html:addTag("span", text .. partText),
+			invalidLink = html:addTag("span", "[[分类:有失效作品链接的页面]]<span style='color:grey'><s>" ..
+				text .. partText ..
+				"</s></span>", "plainlinks"),
+			invalidPart = html:addTag("span", "[[分类:有失效作品链接的页面]]<span style='color:grey'><s>" ..
+				text ..
+				
+				"{{color|grey|<s>" ..
+				partText ..
+				"</s></span>", "plainlinks"),
+			reproduceProhibited = html:addTag("span", text..partText):done()
+			:addTag({tagName="span", wikitext="<small>（禁止转载）</small>", style="color:red"}),
+		}
+		if isInArray(status, {"失效", "删除", "削除"}) then
+			res = output(statusTable.invalidLink)
+		elseif isInArray(status, {"分p失效", "分p删除", "分p削除"}) then
+			res = output(statusTable.invalidPart)
+		elseif status == "禁止转载" then
+			res = output(statusTable.reproduceProhibited)
+		else
+			res = output(statusTable.normal)
+		end
+	else
+		res = output(html:addTag("span", text .. partText))
+	end
 	return res
 end
 
