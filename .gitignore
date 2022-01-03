@@ -1,6 +1,7 @@
 .*.sw*
 /lua_modules
 .trash
+.vscode
 
 # Compiled Lua sources
 luac.out
