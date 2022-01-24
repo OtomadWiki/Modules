@@ -11,8 +11,9 @@ end
 
 function u.switch(args, input)
 	input = input or true
-	for k,v in pairs(args) do
+	for k,v in ipairs(args) do
 		if k==input then
+			if then end
 			return v
 		end
 	end
