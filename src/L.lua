@@ -26,6 +26,7 @@ local linksTable = {
   "可用的作品号前缀参见 [[Template:L]]。",
 }
 
+--local isInArray = require('Module:isInArray').isInArray
 local function isInArray(val, t)
 	for _, v in ipairs(t) do
 		if v == val then
