@@ -9,14 +9,20 @@ function u.isInArray(val, t)
 	return false
 end
 
-function u.switch(args, input)
-	input = input or true
+function u.switch(self, args)
+	local input = self or true
 	for k,v in ipairs(args) do
 		if k==input then
-			if then end
-			return v
+			if k then return v end
 		end
 	end
+end
+
+function u.nowiki(frame)
+  local getArgs = require('Module:Arguments').getArgs
+	local frame = frame or {}
+  local args = getArgs(frame)
+  return "<nowiki>"..args[1].."</nowiki>"
 end
 
 --[=[

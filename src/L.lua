@@ -37,7 +37,7 @@ local function isInArray(val, t)
 end
 
 function L.generate(frame)
-	frame = frame or {}
+	local frame = frame or {}
 	local args = getArgs(frame)
 
 	local num = args['archive'] or args[1]
