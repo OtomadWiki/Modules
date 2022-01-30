@@ -1,10 +1,8 @@
 local L={}
 
---package.path = 'lua_modules'
 local getArgs = require('Module:Arguments').getArgs
+local isInArray = require('Module:Utils').isInArray
 local yesno = require('Module:Yesno')
---local libraryUtil = require('libraryUtil')
---local checkType = libraryUtil.checkType
 --local html = mw.html.create()
 
 local linksTable = {
@@ -26,14 +24,11 @@ local linksTable = {
   "可用的作品号前缀参见 [[Template:L]]。",
 }
 
---local isInArray = require('Module:isInArray').isInArray
-local function isInArray(val, t)
-	for _, v in ipairs(t) do
-		if v == val then
-			return true
-		end
-	end
-	return false
+function L.isValidNum(frame)
+	local frame = frame or {}
+	local args = getArgs(frame)
+	local num = linksTable[args[1]:sub(1, 3):lower()] and args[1]:sub(1, 3):lower() or args[1]:sub(1, 2):lower()
+	return linksTable[num] and "yes" or "no"
 end
 
 function L.generate(frame)
@@ -41,14 +36,16 @@ function L.generate(frame)
 	local args = getArgs(frame)
 
 	local num = args['archive'] or args[1]
-	local prefix = linksTable[num:sub(1, 3)] and num:sub(1, 3):lower() or num:sub(1, 2):lower()
+	local prefix = linksTable[num:sub(1, 3):lower()] and num:sub(1, 3):lower() or num:sub(1, 2):lower()
 	local digit = num:sub(#prefix + 1)
 	local part = args["p"]~='1' and args["p"]
-	local status = args["状态"]
+	local status = args["status"]
+	local option = args["option"]
 
 	local link = linksTable[prefix] and linksTable[prefix] .. 
 		digit .. ( part and "?p=".. part or '' ) or linksTable.err
 	local text = args[2] or num
+	local category = option ~= "nocategory" and "[[分类:有失效作品链接的页面]]" or ""
 	local partText = part and "<sup>第"..part.."P</sup>" or ''
 	local titleText
 	if args['archive'] then
@@ -60,20 +57,18 @@ function L.generate(frame)
 	end
 
 	local res
-	local output = ( yesno(args['pl']) and '' or '[' ) ..
+	local output = ( yesno(args['pl']) and '' or '%s[' ) ..
 			link ..
-			( yesno(args['pl']) and '' or ' %s]' )
-	local statusTable = {normal = output:format("<span title='"..
+			( yesno(args['pl']) and '' or ' %s]%s' )
+	local statusTable = {normal = output:format('', "<span title='"..
 		titleText..
-		"'>"..text..partText.."</span>"),}
+		"'>"..text..partText.."</span>", ''),}
 	if status and args['archive']==nil then
 		statusTable = {
 			normal = statusTable.normal,
-			invalidLink = output:format("[[分类:有失效作品链接的页面]]"..
-				"<span class='plainlinks' title='"..titleText.."' style='color:grey'>"..
-				"<s>" .. text..partText .. "</s></span>"),
-			invalidPart = output:format("[[分类:有失效作品链接的页面]]"..
-				"<span title='"..titleText.."'>" .. text .. "<span style='color:grey'>"..partText.."</span>"),
+			invalidLink = output:format(category ..
+				"<span class='plainlinks'>", "<span title='"..titleText.."' style='color:grey'><s>"..text..partText.."</s></span>", "</span>"),
+			invalidPart = output:format(category, "<span title='"..titleText.."'>" .. text .. "<span style='color:grey'>"..partText.."</span>", ''),
 			reproduceProhibited = statusTable.normal .. "<span style='color:red'><small>（禁止转载）</small></span>",
 		}
 		if isInArray(status, {"失效", "删除", "削除", "非公开"}) then

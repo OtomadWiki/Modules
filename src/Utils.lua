@@ -18,34 +18,15 @@ function u.switch(self, args)
 	end
 end
 
-function u.nowiki(frame)
-  local getArgs = require('Module:Arguments').getArgs
-	local frame = frame or {}
-  local args = getArgs(frame)
-  return "<nowiki>"..args[1].."</nowiki>"
+local function isInDict(kv, t)
+	local key = kv.key
+	local value = kv.value
+	for k, v in ipairs(t) do
+		if k == key or v == val then
+			return true
+		end
+	end
+	return false
 end
 
---[=[
-function html:addTag(...)
-	local args, tagName, wikitext, className,attr, style, parent
-	if #{...} == 1 then
-        args = ...
-		tagName = args.tagName
-		wikitext = args.wikitext
-		className = args.className
-		attr = args.attr
-		style = args.style
-	else
-		tagName, wikitext, className, attr, style, parent = ...
-	end
-	local output = self:tag(tagName):wikitext(wikitext)
-	if attr then output = output:attr(attr) end
-	if className then output = output:addClass(className) end
-	if style then output = output:cssText(style) end
-	parent = output
-	output.addTag = function() return html:addTag(tagName, wikitext, className, attr, style, parent) end
-	output.done = function() return parent or self end
-	return output--:done
-end
---]=]
 return u
