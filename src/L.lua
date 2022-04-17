@@ -2,6 +2,7 @@ local L={}
 
 local getArgs = require('Module:Arguments').getArgs
 local isInArray = require('Module:Utils').isInArray
+local isInDict = require('Module:Utils').isInDict
 local yesno = require('Module:Yesno')
 --local html = mw.html.create()
 
@@ -10,7 +11,7 @@ local linksTable = {
   ['av'] = 'https://www.bilibili.com/video/av',
   ['sm'] = 'https://nicovideo.jp/watch/sm',
   ['nm'] = 'https://nicovideo.jp/watch/nm',
-  ['ac'] = 'https:///acfun.cn/v/ac',
+  ['ac'] = 'https:///www.acfun.cn/v/ac',
   ['au'] = 'https://www.bilibili.com/audio/au',
   ['cv'] = 'https://www.bilibili.com/read/cv',
   ['rl'] = 'https://www.bilibili.com/read/readlist/rl',
@@ -20,15 +21,17 @@ local linksTable = {
   ['im'] = 'https://seiga.nicovideo.jp/seiga/im',
   ['pid'] = 'https://www.pixiv.net/artworks/',
   ['uid'] = 'https://space.bilibili.com/',
-  ['err'] = "<strong class='error'>请指定正确的作品号及其前缀！</strong>" ..
-  "可用的作品号前缀参见 [[Template:L]]。",
 }
 
 function L.isValidNum(frame)
 	local frame = frame or {}
 	local args = getArgs(frame)
-	local num = linksTable[args[1]:sub(1, 3):lower()] and args[1]:sub(1, 3):lower() or args[1]:sub(1, 2):lower()
-	return linksTable[num] and "yes" or "no"
+	if args[1] ~= '' then
+        local num = linksTable[args[1]:sub(1, 3):lower()] and args[1]:sub(1, 3):lower() or args[1]:sub(1, 2):lower()
+    else
+         local num = ''
+    end
+	return (isInDict(num, linksTable) and "yes" or "no")
 end
 
 function L.generate(frame)
@@ -42,8 +45,9 @@ function L.generate(frame)
 	local status = args["status"]
 	local option = args["option"]
 
-	local link = linksTable[prefix] and linksTable[prefix] .. 
-		digit .. ( part and "?p=".. part or '' ) or linksTable.err
+    if not linksTable[prefix] then error("请指定正确的作品号及其前缀！") end
+	local link = linksTable[prefix] .. 
+		digit .. ( part and "?p=".. part or '' )
 	local text = args[2] or num
 	local category = option ~= "nocategory" and "[[分类:有失效作品链接的页面]]" or ""
 	local partText = part and "<sup>第"..part.."P</sup>" or ''
