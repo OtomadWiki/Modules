@@ -26,11 +26,7 @@ local linksTable = {
 function L.isValidNum(frame)
 	local frame = frame or {}
 	local args = getArgs(frame)
-	if args[1] ~= '' then
-        local num = linksTable[args[1]:sub(1, 3):lower()] and args[1]:sub(1, 3):lower() or args[1]:sub(1, 2):lower()
-    else
-         local num = ''
-    end
+	local num = linksTable[args[1]:sub(1, 2):lower()] and args[1]:sub(1, 2):lower() or args[1]:sub(1, 3):lower()
 	return (isInDict(num, linksTable) and "yes" or "no")
 end
 
@@ -49,7 +45,7 @@ function L.generate(frame)
 	local link = linksTable[prefix] .. 
 		digit .. ( part and "?p=".. part or '' )
 	local text = args[2] or num
-	local category = option ~= "nocategory" and "[[分类:有失效作品链接的页面]]" or ""
+	local category = option ~= "nocategory" and "[[分类:有失效链接的页面]]" or ""
 	local partText = part and "<sup>第"..part.."P</sup>" or ''
 	local titleText
 	if args['archive'] then
