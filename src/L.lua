@@ -22,6 +22,17 @@ local linksTable = {
     ['pid'] = 'https://www.pixiv.net/artworks/',
     ['uid'] = 'https://space.bilibili.com/'
 }
+local function parseParam(paramTable)
+    local res = {}
+	local spliter = #res == 0 and '?' or '&'
+    for k, v in pairs(paramTable) do
+    	-- mw.log(k, v)
+        if #v > 0 then
+            table.insert(res, spliter .. mw.text.nowiki(k .. '=' .. v))
+        end
+    end
+    return table.concat(res, '')
+end
 
 function L.isValidNum(frame)
     local frame = frame or {}
@@ -49,13 +60,15 @@ function L.generate(frame)
 
     local num = args['archive'] or args[1]
     local text = args[2] or num
-    local status = args["status"]
+    local status = args["status"] or ""
     local option = args["option"]
     local prefix =
         linksTable[num:sub(1, 3):lower()] and num:sub(1, 3):lower() or
             num:sub(1, 2):lower()
     local digit = num:sub(#prefix + 1)
-    local part = args["p"] ~= '1' and args["p"]
+    local part = args["p"] and tostring(args["p"]) ~= '1' and tostring(args["p"]) or "" -- 为 1 的时候忽略该值
+    local _time = args["t"] and tostring(args["t"]) or ""
+    local paramTable = {["p"] = part, ["t"] = _time}
 
     -- TODO 拆分错误处理函数或者模块
     if not linksTable[prefix] then
@@ -63,12 +76,10 @@ function L.generate(frame)
     end
 
     -- TODO 使用特定模块或者方法处理分类或者链接参数
-    local link = linksTable[prefix] .. digit ..
-                     (part and "?p=" .. part and time and "?t=" .. time) or
-                     (time and "?t=" .. time) or ''
+    local link = linksTable[prefix] .. digit .. parseParam(paramTable)
     local category = option ~= "nocategory" and
                          "[[分类:有失效链接的页面]]" or ""
-    local partText = part and "<sup>第" .. part .. "P</sup>" or ''
+    local partText = (#part > 0 and "<sup>第" .. part .. "P</sup>") or ''
     local titleText
 
     if args['archive'] then
@@ -76,8 +87,8 @@ function L.generate(frame)
     elseif args['origin'] then
         titleText = "此视频搬运自 " .. args['origin']
     else
-        titleText =
-            status and "此作品目前处于" .. status .. "状态。" or num
+        titleText = #status > 0 and "此作品目前处于" .. status ..
+                        "状态。" or num
     end
 
     -- TODO 使用mediawiki自带模块处理html
@@ -85,27 +96,28 @@ function L.generate(frame)
     local output = (yesno(args['pl']) and '' or '%s[') .. link ..
                        (yesno(args['pl']) and '' or ' %s]%s')
     local statusTable = {
-        normal = statusTable.normal,
-        invalidLink = output:format(category .. "<span class='plainlinks'>",
-                                    "<span title='" .. titleText ..
-                                        "' style='color:grey'><s>" .. text ..
-                                        partText .. "</s></span>", "</span>"),
-        invalidPart = output:format(category,
-                                    "<span title='" .. titleText .. "'>" .. text ..
-                                        "<span style='color:grey'>" .. partText ..
-                                        "</span>", ''),
-        reproduceProhibited = statusTable.normal ..
-            "<span style='color:red'><small>（禁止转载）</small></span>",
         normal = output:format('',
                                "<span title='" .. titleText .. "'>" .. text ..
                                    partText .. "</span>", '')
     }
-
-    if status and args['archive'] == nil then
-        if isInArray(status, {"失效", "删除", "削除", "非公开"}) then
+    if #status > 0 and #args['archive'] > 0 then
+        statusTable = {
+            normal = statusTable.normal,
+            invalidLink = output:format(category .. "<span class='plainlinks'>",
+                                        "<span title='" .. titleText ..
+                                            "' style='color:grey'><s>" .. text ..
+                                            partText .. "</s></span>", "</span>"),
+            invalidPart = output:format(category,
+                                        "<span title='" .. titleText .. "'>" ..
+                                            text .. "<span style='color:grey'>" ..
+                                            partText .. "</span>", ''),
+            reproduceProhibited = statusTable.normal ..
+                "<span style='color:red'><small>（禁止转载）</small></span>"
+        }
+        if status:isInArray({"失效", "删除", "削除", "非公开"}) then
             res = statusTable.invalidLink
-        elseif part and
-            isInArray(status, {"分p失效", "分p删除", "分p削除"}) then
+        elseif #part > 0 and
+            status:isInArray({"分p失效", "分p删除", "分p削除"}) then
             res = statusTable.invalidPart
         elseif status == "禁止转载" then
             res = statusTable.reproduceProhibited
