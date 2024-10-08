@@ -1,0 +1,16 @@
+return {
+	["bv"] = "https://www.bilibili.com/video/BV",
+	["av"] = "https://www.bilibili.com/video/av",
+	["sm"] = "https://nicovideo.jp/watch/sm",
+	["nm"] = "https://nicovideo.jp/watch/nm",
+	["ac"] = "https:///www.acfun.cn/v/ac",
+	["au"] = "https://www.bilibili.com/audio/au",
+	["cv"] = "https://www.bilibili.com/read/cv",
+	["rl"] = "https://www.bilibili.com/read/readlist/rl",
+	["ml"] = "https://www.bilibili.com/medialist/play/ml",
+	["ep"] = "https://www.bilibili.com/bangumi/play/ep",
+	["ss"] = "https://www.bilibili.com/bangumi/play/ss",
+	["im"] = "https://seiga.nicovideo.jp/seiga/im",
+	["pid"] = "https://www.pixiv.net/artworks/",
+	["uid"] = "https://space.bilibili.com/",
+}
